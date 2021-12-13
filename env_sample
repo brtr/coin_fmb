@@ -1,0 +1,4 @@
+PRIVATE_KEY = "wallet private key"
+OWNER_ADDRESS = "owner address"
+CONTRACT_ADDRESS = "contract address"
+API_URL = "network url"
