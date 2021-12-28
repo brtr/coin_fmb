@@ -888,15 +888,16 @@ contract FeedMob is ERC20, Ownable {
         totalCount = maxNftSupply;
     }
 
-    function airDrop(address _address) public onlyOwner {
-        require(totalSupply() + 1e18 <= totalCount, "max supply reached!");
-        _mint(_address, 1e18);
+    function airDrop(address _address, uint256 amount) public onlyOwner {
+        uint256 dropAmount = amount * 1e18;
+        require(totalSupply() + dropAmount <= totalCount, "max supply reached!");
+        _mint(_address, dropAmount);
     }
 
-    function mint() public onlyWhiteList {
-        require(totalSupply() + 1e18 <= totalCount, "max supply reached!");
-
-        _mint(_msgSender(), 1e18);
+    function mint(uint256 amount) public onlyWhiteList {
+        uint256 mintAmount = amount * 1e18;
+        require(totalSupply() + mintAmount <= totalCount, "max supply reached!");
+        _mint(_msgSender(), mintAmount);
     }
 
     function getBalance() public view returns (uint256) {
