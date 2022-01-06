@@ -840,9 +840,13 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
 contract FeedMob is ERC20, Ownable {
     //supply counters
-    uint256 public totalCount = 1000000000000000000000000;
-
+    uint256 public totalCount = 1000000 ether;
     address[] private whiteList;
+    struct TaskInfo {
+        uint256 reward;
+        bool isDone;
+    }
+    mapping(uint256 => TaskInfo) public taskInfos;
 
     modifier onlyWhiteList() {
         bool _approved = false;
@@ -862,7 +866,7 @@ contract FeedMob is ERC20, Ownable {
         return whiteList;
     }
 
-    function whiteListLength() private returns (uint256) {
+    function whiteListLength() private view returns (uint256) {
         return whiteList.length;
     }
 
@@ -889,18 +893,35 @@ contract FeedMob is ERC20, Ownable {
     }
 
     function airDrop(address _address, uint256 amount) public onlyOwner {
-        uint256 dropAmount = amount * 1e18;
+        uint256 dropAmount = amount * 1 ether;
         require(totalSupply() + dropAmount <= totalCount, "max supply reached!");
         _mint(_address, dropAmount);
     }
 
-    function mint(uint256 amount) public onlyWhiteList {
-        uint256 mintAmount = amount * 1e18;
+    function mint(uint256 amount, address minter) public onlyWhiteList {
+        uint256 mintAmount = amount * 1 ether;
         require(totalSupply() + mintAmount <= totalCount, "max supply reached!");
-        _mint(_msgSender(), mintAmount);
+        _mint(minter, mintAmount);
     }
 
     function getBalance() public view returns (uint256) {
         return address(this).balance;
+    }
+
+    function addTaskInfo(uint256 taskId, uint256 reward) public onlyWhiteList{
+        taskInfos[taskId] = TaskInfo(reward, false);
+    }
+
+    function getTaskInfo(uint256 taskId) public view returns (TaskInfo memory) {
+        return taskInfos[taskId];
+    }
+
+    function confirmTask(uint256 taskId, address receiver) public onlyWhiteList {
+        TaskInfo storage task = taskInfos[taskId];
+        require(task.reward > 0, "invalid task reward");
+        require(!task.isDone, "duplicate confirmation");
+
+        task.isDone = true;
+        mint(task.reward, receiver);
     }
 }
