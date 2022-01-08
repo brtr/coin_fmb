@@ -841,10 +841,16 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 contract FeedMob is ERC20, Ownable {
     //supply counters
     uint256 public totalCount = 1000000 ether;
+    uint8[] private STATUS = [
+        1,  // submitted
+        2,  // taken
+        3,  // audit
+        4   // done
+    ];
     address[] private whiteList;
     struct TaskInfo {
         uint256 reward;
-        bool isDone;
+        uint8 status;
         address receiver;
     }
     mapping(uint256 => TaskInfo) public taskInfos;
@@ -910,24 +916,33 @@ contract FeedMob is ERC20, Ownable {
     }
 
     function addTaskInfo(uint256 taskId, uint256 reward) public onlyWhiteList{
-        taskInfos[taskId] = TaskInfo(reward, false, address(0));
+        taskInfos[taskId] = TaskInfo(reward, 1, address(0));
     }
 
     function getTaskInfo(uint256 taskId) public view returns (TaskInfo memory) {
         return taskInfos[taskId];
     }
 
-    function complete(uint256 taskId, address receiver) public {
+    function take(uint256 taskId, address receiver) public {
         TaskInfo storage task = taskInfos[taskId];
+        require(task.status == 1, "invalid status");
         task.receiver = receiver;
+        task.status = 2;
     }
 
-    function confirmTask(uint256 taskId) public onlyWhiteList {
+    function complete(uint256 taskId) public {
+        TaskInfo storage task = taskInfos[taskId];
+        require(task.receiver == _msgSender(), "invalid receiver");
+        require(task.status == 2, "invalid status");
+        task.status = 3;
+    }
+
+    function confirm(uint256 taskId) public onlyWhiteList {
         TaskInfo storage task = taskInfos[taskId];
         require(task.reward > 0, "invalid task reward");
-        require(!task.isDone, "duplicate confirmation");
+        require(task.status == 3, "invalid status");
 
-        task.isDone = true;
+        task.status = 4;
         mint(task.reward, task.receiver);
     }
 }
