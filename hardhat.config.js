@@ -6,7 +6,7 @@ require('dotenv').config();
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-etherscan"); 
 
-const { API_KEY, API_URL, PRIVATE_KEY } = process.env;
+const { MAIN_API_URL, MAIN_PRIVATE_KEY, API_KEY, API_URL, PRIVATE_KEY } = process.env;
 
 module.exports = {
    solidity: "0.8.0",
@@ -14,10 +14,13 @@ module.exports = {
       apiKey: API_KEY,
    },
    networks: {
-      main: {
-	 chainId: 43114,
+      rinkeby: {
          url: API_URL,
          accounts: [PRIVATE_KEY]
+      },
+      main: {
+         url: MAIN_API_URL,
+         accounts: [MAIN_PRIVATE_KEY]
       }
    },
 }
