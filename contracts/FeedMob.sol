@@ -845,6 +845,7 @@ contract FeedMob is ERC20, Ownable {
     struct TaskInfo {
         uint256 reward;
         bool isDone;
+        address receiver;
     }
     mapping(uint256 => TaskInfo) public taskInfos;
 
@@ -909,19 +910,24 @@ contract FeedMob is ERC20, Ownable {
     }
 
     function addTaskInfo(uint256 taskId, uint256 reward) public onlyWhiteList{
-        taskInfos[taskId] = TaskInfo(reward, false);
+        taskInfos[taskId] = TaskInfo(reward, false, address(0));
     }
 
     function getTaskInfo(uint256 taskId) public view returns (TaskInfo memory) {
         return taskInfos[taskId];
     }
 
-    function confirmTask(uint256 taskId, address receiver) public onlyWhiteList {
+    function complete(uint256 taskId, address receiver) public {
+        TaskInfo storage task = taskInfos[taskId];
+        task.receiver = receiver;
+    }
+
+    function confirmTask(uint256 taskId) public onlyWhiteList {
         TaskInfo storage task = taskInfos[taskId];
         require(task.reward > 0, "invalid task reward");
         require(!task.isDone, "duplicate confirmation");
 
         task.isDone = true;
-        mint(task.reward, receiver);
+        mint(task.reward, task.receiver);
     }
 }
