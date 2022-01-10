@@ -11,7 +11,7 @@ const { MAIN_API_URL, MAIN_PRIVATE_KEY, API_KEY, API_URL, PRIVATE_KEY } = proces
 module.exports = {
    solidity: "0.8.0",
    etherscan: {
-      apiKey: API_KEY,
+      apiKey: MAIN_API_KEY,
    },
    networks: {
       rinkeby: {

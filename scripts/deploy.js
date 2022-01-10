@@ -1,3 +1,5 @@
+// npx hardhat run scripts/deploy.js --network rinkeby
+// npx hardhat verify --network rinkeby contract_address
 const hre = require("hardhat");
 async function main() {
   const NFT = await hre.ethers.getContractFactory("FeedMob");
