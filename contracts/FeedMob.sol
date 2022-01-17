@@ -839,15 +839,19 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
 
 contract FeedMob is ERC20, Ownable {
+    event AddTaskInfo(uint256 taskId, uint256 reward);
+    event Take(uint256 taskId, address receiver);
+    event Complete(uint256 taskId);
+    event Confirm(uint256 taskId);
     //supply counters
     uint256 public totalCount = 1000000 ether;
+    address[] private whiteList;
     uint8[] private STATUS = [
         1,  // submitted
         2,  // taken
         3,  // audit
         4   // done
     ];
-    address[] private whiteList;
     struct TaskInfo {
         uint256 reward;
         uint8 status;
@@ -917,6 +921,7 @@ contract FeedMob is ERC20, Ownable {
 
     function addTaskInfo(uint256 taskId, uint256 reward) public onlyWhiteList{
         taskInfos[taskId] = TaskInfo(reward, 1, address(0));
+        emit AddTaskInfo(taskId, reward);
     }
 
     function getTaskInfo(uint256 taskId) public view returns (TaskInfo memory) {
@@ -928,6 +933,7 @@ contract FeedMob is ERC20, Ownable {
         require(task.status == 1, "invalid status");
         task.receiver = receiver;
         task.status = 2;
+        emit Take(taskId, receiver);
     }
 
     function complete(uint256 taskId) public {
@@ -935,6 +941,7 @@ contract FeedMob is ERC20, Ownable {
         require(task.receiver == _msgSender(), "invalid receiver");
         require(task.status == 2, "invalid status");
         task.status = 3;
+        emit Complete(taskId);
     }
 
     function confirm(uint256 taskId) public onlyWhiteList {
@@ -943,6 +950,7 @@ contract FeedMob is ERC20, Ownable {
         require(task.status == 3, "invalid status");
 
         task.status = 4;
+        emit Confirm(taskId);
         mint(task.reward, task.receiver);
     }
 }
